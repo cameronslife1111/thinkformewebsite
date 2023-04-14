@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bread Crumbs</title>
+    <style>
+        :root {
+            --main-bg-color: #1a1a1a;
+            --accent-color: #4CBB17;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-image: linear-gradient(45deg, #1a1a1a, #333);
+            color: white;
+        }
+        h1 {
+            text-align: center;
+        }
+        .text-box {
+            width: 100%;
+            max-width: 500px;
+            height: 30px;
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .large-text-box {
+            width: 100%;
+            max-width: 500px;
+            height: 150px;
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            background-color: rgba(255, 255, 0, 0.8);
+            color: black;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .button-container button {
+            margin: 0 10px;
+            font-size: 16px;
+            padding: 10px 20px;
+            background-color: var(--accent-color);
+            border: none;
+            color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button-container button:hover {
+            background-color: #3c9b11;
+        }
+        .text-box-container {
+            display: flex;
+            flex-wrap: wrap;
+            max-width: 500px;
+            margin: auto;
+        }
+        .progress-container {
+    width: 100%;
+    max-width: 500px;
+    height: 10px;
+    background-color: white;
+    border-radius: 5px;
+    margin: 20px auto;
+}
+
+.progress {
+    height: 10px;
+    background-color: #4CBB17;
+    border-radius: 5px;
+    width: 0%;
+    transition: width 0.5s;
+}
+    </style>
+</head>
+<body>
+    <h1>Think For Me - V28</h1>
+    <div class="progress-container">
+    <div class="progress" id="progressBar"></div>
+</div>
+
+    <div class="button-container">
+        <button onclick="babySteps()">Baby steps</button>
+        <button onclick="startSpeaking()">Start Speaking</button>
+        <button onclick="stopSpeaking()">Stop Speaking</button>
+        <button onclick="shiftList()">Shift List</button>
+        <button id="voiceModeButton">Voice Mode</button>
+    </div>
+   
+    <div style="text-align: center; margin-top: 20px;">
+    <label for="speakInterval" style="margin-right: 10px;">Speak Interval:</label>
+    <select id="speakInterval">
+        <option value="11000">11 seconds</option>
+        <option value="30000">30 seconds</option>
+        <option value="60000">1 minute</option>
+        <option value="180000">3 minutes</option>
+        <option value="300000">5 minutes</option>
+        <option value="600000">10 minutes</option>
+    </select>
+</div>
+
+    <textarea class="large-text-box" id="largeTextBox" maxlength="15000" placeholder="Type baby step sentences..."></textarea>
+    <p id="moneyCounter" style="color: #4CBB17; font-size: 20px; text-align: center;">$0.00</p>
+    <div class="text-box-container">
+        <input type="text" class="text-box" id="text1" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text2" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text3" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text4" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text5" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text6" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text7" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text8" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text9" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text10" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text11" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text12" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text13" maxlength="200" placeholder="Type something...">
+                <input type="text" class="text-box" id="text14" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text15" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text16" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text17" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text18" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text19" maxlength="200" placeholder="Type something...">
+        <input type="text" class="text-box" id="text20" maxlength="200" placeholder="Type something...">
+    </div>
+    <script>
+        let msg = null;
+        let repeatIntervalId = null;
+        let textBoxes = null;
+        let currentIndex = 0;
+        let shiftCounter = 0;
+        let recognitionShouldRestart = false;
+        let recognitionIsActive = false;
+
+
+function babySteps() {
+    const largeTextBox = document.getElementById('largeTextBox');
+    const steps = largeTextBox.value.match(/(?:^|\s)[^.!?]*[.!?]/g).slice(0, 20);
+
+    for (let i = 0; i < 20; i++) {
+        document.getElementById('text' + (i + 1)).value = steps[i] || '';
+    }
+
+    largeTextBox.value = steps.reduce((text, step) => {
+        return text.replace(step.trim(), '');
+    }, largeTextBox.value).trim();
+}
+
+    function startSpeaking() {
+    if (msg) {
+        window.speechSynthesis.cancel(msg);
+    }
+
+    textBoxes = document.querySelectorAll('.text-box');
+    currentIndex = 0;
+
+    speakFirstTextBox();
+
+    // Clear the previous interval (if any) before setting a new one
+    if (repeatIntervalId) {
+        clearInterval(repeatIntervalId);
+    }
+
+    // Get the selected interval value
+    const speakInterval = document.getElementById('speakInterval').value;
+
+    // Start the repeat interval with the selected value
+    repeatIntervalId = setInterval(speakFirstTextBox, parseInt(speakInterval));
+   
+}
+
+function stopSpeaking() {
+    window.speechSynthesis.cancel(msg);
+    clearInterval(repeatIntervalId);
+    repeatIntervalId = null;
+    currentIndex = 0;
+}
+       
+        function speakFirstTextBox() {
+            const text = textBoxes[0].value;
+            msg = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(msg);
+
+            msg.onend = function() {
+                // Do nothing
+            };
+        }
+
+        function speakNextTextBox() {
+            if (currentIndex >= textBoxes.length) {
+                currentIndex = 0;
+            }
+
+            const text = textBoxes[currentIndex].value;
+            msg = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(msg);
+
+            msg.onend = function() {
+                currentIndex++;
+
+                if (currentIndex >= textBoxes.length) {
+                    repeatIntervalId = setTimeout(startSpeaking, 11000);
+                } else {
+                    setTimeout(speakNextTextBox, 1000);
+                }
+            };
+        }
+
+        function stopSpeaking() {
+            window.speechSynthesis.cancel(msg);
+            clearInterval(repeatIntervalId);
+            repeatIntervalId = null;
+            currentIndex = 0;
+        }
+
+function speakFirstText() {
+        const firstTextMsg = new SpeechSynthesisUtterance(document.getElementById('text1').value);
+        window.speechSynthesis.speak(firstTextMsg);
+    }
+
+    function speakGreatJob() {
+        const greatJobMsg = new SpeechSynthesisUtterance("List Updated");
+        window.speechSynthesis.speak(greatJobMsg);
+        greatJobMsg.onend = function() {
+            speakFirstText();
+        };
+    }
+
+        function shiftList() {
+            // Stop the current speaking process
+    stopSpeaking();
+
+            // Update the progress bar
+    shiftCounter++;
+    const progressBar = document.getElementById("progressBar");
+    progressBar.style.width = (shiftCounter % 101) + "%";
+   
+            const text2 = document.getElementById('text2').value;
+            const text3 = document.getElementById('text3').value;
+            const text4 = document.getElementById('text4').value;
+            const text5 = document.getElementById('text5').value;
+            const text6 = document.getElementById('text6').value;
+            const text7 = document.getElementById('text7').value;
+            const text8 = document.getElementById('text8').value;
+            const text9 = document.getElementById('text9').value;
+            const text10 = document.getElementById('text10').value;
+            const text11 = document.getElementById('text11').value;
+            const text12 = document.getElementById('text12').value;
+            const text13 = document.getElementById('text13').value;
+            const text14 = document.getElementById('text14').value;
+            const text15 = document.getElementById('text15').value;
+            const text16 = document.getElementById('text16').value;
+            const text17 = document.getElementById('text17').value;
+            const text18 = document.getElementById('text18').value;
+            const text19 = document.getElementById('text19').value;
+            const text20 = document.getElementById('text20').value;
+
+            document.getElementById('text1').value = text2;
+            document.getElementById('text2').value = text3;
+            document.getElementById('text3').value = text4;
+            document.getElementById('text4').value = text5;
+            document.getElementById('text5').value = text6;
+            document.getElementById('text6').value = text7;
+            document.getElementById('text7').value = text8;
+                        document.getElementById('text8').value = text9;
+            document.getElementById('text9').value = text10;
+            document.getElementById('text10').value = text11;
+            document.getElementById('text11').value = text12;
+            document.getElementById('text12').value = text13;
+            document.getElementById('text13').value = text14;
+            document.getElementById('text14').value = text15;
+            document.getElementById('text15').value = text16;
+            document.getElementById('text16').value = text17;
+            document.getElementById('text17').value = text18;
+            document.getElementById('text18').value = text19;
+            document.getElementById('text19').value = text20;
+            document.getElementById('text20').value = '';
+            let moneyCounter = document.getElementById("moneyCounter");
+moneyCounter.innerHTML = "$" + (parseInt(moneyCounter.innerHTML.replace("$", "").replace(",", "")) + 10000).toLocaleString("en-US", { minimumFractionDigits: 2 });
+       
+           
+            // Restart the speaking process
+    startSpeaking();
+           
+        }
+       
+   
+    function handleKeyDown(event) {
+    if (event.keyCode === 39) { // Right arrow key
+        shiftList();
+    } else if (event.keyCode === 37) { // Left arrow key
+        babySteps();
+    } else if (event.keyCode === 38) { // Up arrow key
+        startSpeaking();
+    } else if (event.keyCode === 40) { // Down arrow key
+        stopSpeaking();
+    }
+}
+
+document.addEventListener('keydown', handleKeyDown);
+
+document.getElementById('speakInterval').addEventListener('change', function() {
+    if (repeatIntervalId) {
+        clearInterval(repeatIntervalId);
+        repeatIntervalId = null;
+        startSpeaking();
+    }
+});
+
+// Voice commands
+const VoiceRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = new VoiceRecognition();
+
+recognition.continuous = true;
+recognition.interimResults = false;
+recognition.lang = 'en-US';
+
+recognition.onresult = function(event) {
+    const current = event.resultIndex;
+    const transcript = event.results[current][0].transcript.toLowerCase().trim();
+
+    if (transcript.includes("start speaking please")) {
+        startSpeaking();
+    } else if (transcript.includes("stop speaking please")) {
+        stopSpeaking();
+    } else if (transcript.includes("next please")) {
+        shiftList();
+    } else if (transcript.includes("baby steps please")) {
+        babySteps();
+    } else if (transcript.includes("next interval")) {
+        nextSpeakInterval();
+    }
+};
+
+recognition.onerror = function(event) {
+    console.error(event.error);
+};
+
+recognition.onend = function() {
+    if (recognitionShouldRestart) {
+        setTimeout(() => {
+            recognition.start(); // Restart the voice recognition if it was stopped unintentionally
+        }, 100);
+    }
+};
+
+
+
+
+
+
+
+document.getElementById("voiceModeButton").addEventListener("click", function() {
+    recognitionIsActive = !recognitionIsActive;
+    if (recognitionIsActive) {
+        recognitionShouldRestart = true;
+        recognition.start();
+    } else {
+        recognitionShouldRestart = false;
+        recognition.stop();
+    }
+});
+
+
+
+function nextSpeakInterval() {
+    const speakInterval = document.getElementById('speakInterval');
+    const currentIntervalIndex = speakInterval.selectedIndex;
+
+    if (currentIntervalIndex < speakInterval.options.length - 1) {
+        speakInterval.selectedIndex = currentIntervalIndex + 1;
+    } else {
+        speakInterval.selectedIndex = 0;
+    }
+
+    // Restart the speaking process with the new interval
+    if (repeatIntervalId) {
+        clearInterval(repeatIntervalId);
+        repeatIntervalId = null;
+        startSpeaking();
+    }
+}
+
+
+
+
+    </script>
+</body>
+</html>
